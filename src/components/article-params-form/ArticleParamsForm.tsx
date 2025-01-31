@@ -13,6 +13,7 @@ import {
 	contentWidthArr,
 	defaultArticleState,
 	ArticleStateType,
+	OptionType,
 } from 'src/constants/articleProps';
 import { Text } from 'src/ui/text';
 import { Select } from 'src/ui/select';
@@ -20,18 +21,13 @@ import { RadioGroup } from 'src/ui/radio-group';
 import { Separator } from 'src/ui/separator';
 
 type TArticleProps = {
-	state: ArticleStateType;
-	setState: (props: ArticleStateType) => void;
+	setArticleState: (props: ArticleStateType) => void;
 };
 
-export const ArticleParamsForm = ({ state, setState }: TArticleProps) => {
+export const ArticleParamsForm = ({ setArticleState }: TArticleProps) => {
 	const formRef = useRef<HTMLFormElement | null>(null);
 	const [isOpen, setIsOpen] = useState(false);
-	const [fontFamily, setFontFamily] = useState(state.fontFamilyOption);
-	const [fontColor, setFontColors] = useState(state.fontColor);
-	const [background, setBackground] = useState(state.backgroundColor);
-	const [contentWidth, setContentWidth] = useState(state.contentWidth);
-	const [fontSize, setFontSize] = useState(state.fontSizeOption);
+	const [state, setState] = useState<ArticleStateType>(defaultArticleState);
 
 	const toggleStateAside = () => {
 		setIsOpen((prevState) => !prevState);
@@ -43,29 +39,24 @@ export const ArticleParamsForm = ({ state, setState }: TArticleProps) => {
 		onClose: toggleStateAside,
 	});
 
+	const handleOnChange = (field: keyof ArticleStateType) => {
+		return (value: OptionType) => {
+			setState((prevState) => ({
+				...prevState,
+				[field]: value,
+			}));
+		};
+	};
+
 	const handleFormSubmit = (event: FormEvent) => {
 		event.preventDefault();
-
-		setState({
-			...state,
-			fontFamilyOption: fontFamily,
-			fontColor: fontColor,
-			backgroundColor: background,
-			contentWidth: contentWidth,
-			fontSizeOption: fontSize,
-		});
-
+		setArticleState(state);
 		toggleStateAside();
 	};
 
 	const handleFormReset = () => {
+		setArticleState(defaultArticleState);
 		setState(defaultArticleState);
-		setFontFamily(defaultArticleState.fontFamilyOption);
-		setFontColors(defaultArticleState.fontColor);
-		setBackground(defaultArticleState.backgroundColor);
-		setContentWidth(defaultArticleState.contentWidth);
-		setFontSize(defaultArticleState.fontSizeOption);
-
 		toggleStateAside();
 	};
 
@@ -86,35 +77,35 @@ export const ArticleParamsForm = ({ state, setState }: TArticleProps) => {
 						Задайте параметры
 					</Text>
 					<Select
-						selected={fontFamily}
+						selected={state.fontFamilyOption}
 						options={fontFamilyOptions}
-						onChange={setFontFamily}
+						onChange={handleOnChange('fontFamilyOption')}
 						title='Шрифт'
 					/>
 					<RadioGroup
-						selected={fontSize}
+						selected={state.fontSizeOption}
 						options={fontSizeOptions}
-						onChange={setFontSize}
+						onChange={handleOnChange('fontSizeOption')}
 						name='fontSize'
 						title='Размер шрифт'
 					/>
 					<Select
-						selected={fontColor}
+						selected={state.fontColor}
 						options={fontColors}
-						onChange={setFontColors}
+						onChange={handleOnChange('fontColor')}
 						title='Цвет шрифта'
 					/>
 					<Separator />
 					<Select
-						selected={background}
+						selected={state.backgroundColor}
 						options={backgroundColors}
-						onChange={setBackground}
+						onChange={handleOnChange('backgroundColor')}
 						title='Цвет фона'
 					/>
 					<Select
-						selected={contentWidth}
+						selected={state.contentWidth}
 						options={contentWidthArr}
-						onChange={setContentWidth}
+						onChange={handleOnChange('contentWidth')}
 						title='Ширина контента'
 					/>
 					<div className={styles.bottomContainer}>
